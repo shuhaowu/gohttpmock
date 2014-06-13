@@ -3,7 +3,9 @@ gohttpmock
 
 Mocking HTTP calls in Go. 
 
-![Travis Status](https://travis-ci.org/shuhaowu/gohttpmock.svg)
+[![Travis Status](https://travis-ci.org/shuhaowu/gohttpmock.svg)][travis]
+
+[travis]: https://travis-ci.org/shuhaowu/gohttpmock
 
 Examples
 --------
