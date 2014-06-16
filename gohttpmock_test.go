@@ -189,6 +189,26 @@ func TestRespondFunc(t *testing.T) {
 	}
 }
 
+func TestPassThrough(t *testing.T) {
+	record := StartTestHTTPCall()
+	defer EndTestHTTPCall()
+
+	record.When("GET", "http://example.com").PassThrough()
+
+	resp, err := http.Get("http://example.com")
+	if err != nil {
+		t.Fatalf("Either you don't have internet, example.com is down, or the test has failed")
+	}
+
+	if len(record.Requests) > 0 {
+		t.Fatalf("record.Requests should have 0 items but it has %d", len(record.Requests))
+	}
+
+	if resp.StatusCode != 200 {
+		t.Fatalf("Either example.com is returning something weird or this test has failed")
+	}
+}
+
 func TestEndTestHTTPCall(t *testing.T) {
 	_ = StartTestHTTPCall()
 	EndTestHTTPCall()

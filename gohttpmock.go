@@ -44,7 +44,6 @@ func requestKey(method, url string) string {
 }
 
 func (t *RecordingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	t.Requests = append(t.Requests, req)
 	s, ok := t.responses[requestKey(req.Method, req.URL.String())]
 	var res *TestResponse
 	if !ok {
@@ -55,8 +54,12 @@ func (t *RecordingTransport) RoundTrip(req *http.Request) (*http.Response, error
 			res = s.(*TestResponse)
 		case HandlerFunc:
 			res = (s.(HandlerFunc))(req)
+		case bool:
+			return defaultTransport.RoundTrip(req)
 		}
 	}
+
+	t.Requests = append(t.Requests, req)
 
 	return &http.Response{
 		StatusCode: res.StatusCode,
@@ -104,6 +107,14 @@ func (t *RequestHandler) Respond(status int, body string, contentType string) {
 // Define the response for a particular method/url but with a function.
 func (t *RequestHandler) RespondFunc(f HandlerFunc) {
 	t.recordingTransport.responses[requestKey(t.method, t.url)] = f
+}
+
+// Allow a request to this route to be passed through to become an actual
+// request.
+//
+// This request will NOT be logged into .Requests
+func (t *RequestHandler) PassThrough() {
+	t.recordingTransport.responses[requestKey(t.method, t.url)] = false
 }
 
 // Starts the test http call process. Disallow any real http call and record

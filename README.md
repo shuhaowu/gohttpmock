@@ -51,7 +51,7 @@ Here's a simple use case, with test written with [gocheck][gc].
     }
 
 You can also generate a response on demand:
-    
+
     i := 0
     f := func(req *http.Request) *gohttpmock.TestResponse {
         i++
@@ -66,6 +66,16 @@ You can also generate a response on demand:
 
 If you do not define a route, any request while `StartTestHTTPCall` is called
 and `EndTestHTTPCall` is not will result in a 404.
+
+If you want a request to actually be called while have everything else blocked,
+such as in a case when you run a `httptest.Server`, you can use the
+`PassThrough` method:
+
+    record.When("POST", "http://google.com").PassThrough()
+
+    // This will return the actual google.com. It will NOT record the request
+    // in record.Requests
+    resp, err = http.Post("http://google.com")
 
 For more information, see the [documentation][doc].
 
