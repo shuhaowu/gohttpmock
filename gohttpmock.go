@@ -2,6 +2,7 @@ package gohttpmock
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -47,16 +48,16 @@ func (t *RecordingTransport) RoundTrip(req *http.Request) (*http.Response, error
 	s, ok := t.responses[requestKey(req.Method, req.URL.String())]
 	var res *TestResponse
 	if !ok {
-		res = NewTestResponse(404, "Not Found", "text/plain")
-	} else {
-		switch s.(type) {
-		case *TestResponse:
-			res = s.(*TestResponse)
-		case HandlerFunc:
-			res = (s.(HandlerFunc))(req)
-		case bool:
-			return defaultTransport.RoundTrip(req)
-		}
+		return nil, fmt.Errorf("connection to %s is not permitted by gohttpmock", req.URL.String())
+	}
+
+	switch s.(type) {
+	case *TestResponse:
+		res = s.(*TestResponse)
+	case HandlerFunc:
+		res = (s.(HandlerFunc))(req)
+	case bool:
+		return defaultTransport.RoundTrip(req)
 	}
 
 	t.Requests = append(t.Requests, req)

@@ -54,30 +54,19 @@ func TestRespond(t *testing.T) {
 		t.Fatalf("record.RequestBody(0) is not '' but is %q", record.RequestBody(0))
 	}
 
+	// Getting a route not allowed
 	resp, err = http.Post(exampleCom, "text/plain", bytes.NewBufferString("reqbody"))
 
-	if err != nil {
-		t.Fatalf("err should be nil but is %q", err)
+	if err == nil {
+		t.Fatalf("err should not be nil")
 	}
 
-	if resp.StatusCode != 404 {
-		t.Fatalf("resp.StatusCode should be 404 but is %q", resp.StatusCode)
+	if resp != nil {
+		t.Fatalf("resp should be nil but is %v", resp)
 	}
 
-	if len(record.Requests) != 2 {
-		t.Fatalf("record.Requests should only have 2 item but has %d", len(record.Requests))
-	}
-
-	if record.Requests[1].Method != "POST" {
-		t.Fatalf("record.Requests[1].Method is not POST but is %q", record.Requests[0].Method)
-	}
-
-	if record.Requests[1].URL.String() != exampleCom {
-		t.Fatalf("record.Requests[1].URL.String() is not example.com but is %q", record.Requests[0].URL.String())
-	}
-
-	if record.RequestBody(1) != "reqbody" {
-		t.Fatalf("record.RequestBody(1) is not 'reqbody' but is %q", record.RequestBody(0))
+	if len(record.Requests) != 1 {
+		t.Fatalf("record.Requests should only have 1 item but has %d", len(record.Requests))
 	}
 
 	record.When("POST", exampleCom).Respond(200, "postedbody", "text/plain")
@@ -97,20 +86,20 @@ func TestRespond(t *testing.T) {
 		t.Fatalf("resp.Body is not 'postedbody' but is %q", respBody)
 	}
 
-	if len(record.Requests) != 3 {
-		t.Fatalf("record.Requests should only have 3 item but has %d", len(record.Requests))
+	if len(record.Requests) != 2 {
+		t.Fatalf("record.Requests should only have 2 item but has %d", len(record.Requests))
 	}
 
-	if record.Requests[2].Method != "POST" {
-		t.Fatalf("record.Requests[2].Method is not POST but is %q", record.Requests[0].Method)
+	if record.Requests[1].Method != "POST" {
+		t.Fatalf("record.Requests[1].Method is not POST but is %q", record.Requests[0].Method)
 	}
 
-	if record.Requests[2].URL.String() != exampleCom {
-		t.Fatalf("record.Requests[2].URL.String() is not example.com but is %q", record.Requests[0].URL.String())
+	if record.Requests[1].URL.String() != exampleCom {
+		t.Fatalf("record.Requests[1].URL.String() is not example.com but is %q", record.Requests[0].URL.String())
 	}
 
-	if record.RequestBody(2) != "reqbody" {
-		t.Fatalf("record.RequestBody(2) is not 'reqbody' but is %q", record.RequestBody(0))
+	if record.RequestBody(1) != "reqbody" {
+		t.Fatalf("record.RequestBody(1) is not 'reqbody' but is %q", record.RequestBody(0))
 	}
 }
 
