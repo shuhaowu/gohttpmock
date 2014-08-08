@@ -80,7 +80,9 @@ func (t *RecordingTransport) RequestBody(i int) string {
 
 	buf := bytes.Buffer{}
 	buf.ReadFrom(t.Requests[i].Body)
-	return buf.String()
+	data := buf.Bytes()
+	t.Requests[i].Body = ioutil.NopCloser(bytes.NewBuffer(data))
+	return string(data)
 }
 
 // Creates an expectation. Usually used in shorthand like the following:

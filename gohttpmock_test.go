@@ -219,3 +219,25 @@ func TestEndTestHTTPCall(t *testing.T) {
 		t.Fatalf("Either %q is a real place now, or this test just failed", fakeDomain)
 	}
 }
+
+func TestRequestBodyMultipleUses(t *testing.T) {
+	record := StartTestHTTPCall()
+	defer EndTestHTTPCall()
+
+	record.When("POST", exampleCom).Respond(200, "OK", "text/plain")
+
+	_, err := http.Post(exampleCom, "text/plain", bytes.NewBufferString("reqbody"))
+	if err != nil {
+		t.Fatalf("err should be nil but is %q", err)
+	}
+
+	body0 := record.RequestBody(0)
+	if body0 != "reqbody" {
+		t.Fatalf("record.RequestBody(0) the first time should be 'reqbody' but is %q", body0)
+	}
+
+	body1 := record.RequestBody(0)
+	if body1 != "reqbody" {
+		t.Fatalf("record.RequestBody(0) the second time should be 'reqbody' but is %q", body1)
+	}
+}
