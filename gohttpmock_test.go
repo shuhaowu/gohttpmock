@@ -198,12 +198,33 @@ func TestPassThrough(t *testing.T) {
 	}
 }
 
+func TestPassThroughPrefix(t *testing.T) {
+	record := StartTestHTTPCall()
+	defer EndTestHTTPCall()
+
+	record.When("GET", exampleCom).PrefixPassThrough()
+
+	_, err := http.Get(exampleCom)
+	if err != nil {
+		t.Fatalf("err should be nil but is %q", err)
+	}
+
+	_, err = http.Get(exampleCom + "test/test")
+	if err != nil {
+		t.Fatalf("err should be nil but is %q", err)
+	}
+
+	_, err = http.Post(exampleCom, "text/plain", bytes.NewBufferString("reqbody"))
+	if err == nil {
+		t.Fatal("err should be something but is nil")
+	}
+}
+
 func TestEndTestHTTPCall(t *testing.T) {
 	_ = StartTestHTTPCall()
 	EndTestHTTPCall()
 
 	_, err := http.Get(fakeDomain)
-
 	if err == nil {
 		t.Fatalf("Either %q is a real place now, or this test just failed", fakeDomain)
 	}

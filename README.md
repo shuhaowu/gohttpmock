@@ -1,7 +1,7 @@
 gohttpmock
 ==========
 
-Mocking HTTP calls in Go. 
+Mocking HTTP calls in Go. Requires Go 1.3
 
 [![Travis Status](https://travis-ci.org/shuhaowu/gohttpmock.svg)][travis]
 

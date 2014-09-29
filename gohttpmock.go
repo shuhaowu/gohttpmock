@@ -37,7 +37,8 @@ type RecordingTransport struct {
 	// A list of *http.Request that is in the order of which they are requested.
 	Requests []*http.Request
 
-	responses map[string]interface{}
+	responses           map[string]interface{}
+	passThroughPrefixes [][2]string
 }
 
 func requestKey(method, url string) string {
@@ -45,6 +46,13 @@ func requestKey(method, url string) string {
 }
 
 func (t *RecordingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	for _, info := range t.passThroughPrefixes {
+		method, url := info[0], info[1]
+		if req.Method == method && strings.HasPrefix(req.URL.String(), url) {
+			return defaultTransport.RoundTrip(req)
+		}
+	}
+
 	s, ok := t.responses[requestKey(req.Method, req.URL.String())]
 	var res *TestResponse
 	if !ok {
@@ -120,6 +128,13 @@ func (t *RequestHandler) PassThrough() {
 	t.recordingTransport.responses[requestKey(t.method, t.url)] = false
 }
 
+// Allow all requests that starts with this to passthrough
+//
+// This request will NOT be logged into .Requests
+func (t *RequestHandler) PrefixPassThrough() {
+	t.recordingTransport.passThroughPrefixes = append(t.recordingTransport.passThroughPrefixes, [2]string{t.method, t.url})
+}
+
 // Starts the test http call process. Disallow any real http call and record
 // all of them.
 //
@@ -127,6 +142,7 @@ func (t *RequestHandler) PassThrough() {
 func StartTestHTTPCall() *RecordingTransport {
 	t := &RecordingTransport{}
 	t.responses = make(map[string]interface{})
+	t.passThroughPrefixes = make([][2]string, 0)
 	http.DefaultTransport = t
 	return t
 }
